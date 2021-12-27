@@ -8,6 +8,8 @@ Noob Env is a tools for working with `.env`, such as:
 - Load Env
 - Get Env
 
+Noob Env use [GoDotEnv v1.4.0](github.com/joho/godotenv) to load & parse `.env`. Thanks to [*godotenv*](github.com/joho/godotenv)**
+
 ## Contents
 
 - [Noob-Env](#Noob-Env)
