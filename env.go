@@ -3,12 +3,48 @@ package env
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/alfarih31/nb-go-parser"
 	"github.com/joho/godotenv"
 	"os"
+	"reflect"
 )
 
-var ErrorVarNotExist = errors.New("variable not exist")
+type Err struct {
+	e error
+}
+
+// HasZeroValue Check a variable has Zero Value
+func hasZeroValue(v interface{}) bool {
+	if v == nil {
+		return true
+	}
+
+	t := reflect.TypeOf(v)
+	if t == nil {
+		return true
+	}
+
+	return v == reflect.Zero(t).Interface()
+}
+
+func (e *Err) Errorf(f string, s ...interface{}) *Err {
+	return &Err{
+		e: errors.New(fmt.Sprintf(fmt.Sprintf("this %s: %s", e.e.Error(), f), s...)),
+	}
+}
+
+func (e *Err) Error() string {
+	return e.e.Error()
+}
+
+func NewEnvErr(s string) *Err {
+	return &Err{
+		e: errors.New(s),
+	}
+}
+
+var ErrorVarNotExist = NewEnvErr("variable not exist")
 
 type env struct {
 	envs      map[string]string
@@ -26,10 +62,9 @@ type Env interface {
 
 func (c env) GetInt(k string, def ...int) (int, error) {
 	cfg, exist := c.get(k)
-
 	if !exist {
 		if len(def) == 0 {
-			return 0, ErrorVarNotExist
+			return 0, ErrorVarNotExist.Errorf("%s", k)
 		}
 		return def[0], nil
 	}
@@ -51,7 +86,7 @@ func (c env) GetString(k string, def ...string) (string, error) {
 	cfg, exist := c.get(k)
 	if !exist {
 		if len(def) == 0 {
-			return "", ErrorVarNotExist
+			return "", ErrorVarNotExist.Errorf("%s", k)
 		}
 		return def[0], nil
 	}
@@ -63,7 +98,7 @@ func (c env) GetBool(k string, def ...bool) (bool, error) {
 	cfg, exist := c.get(k)
 	if !exist {
 		if len(def) == 0 {
-			return false, ErrorVarNotExist
+			return false, ErrorVarNotExist.Errorf("%s", k)
 		}
 		return def[0], nil
 	}
@@ -83,18 +118,19 @@ func (c env) GetBool(k string, def ...bool) (bool, error) {
 func (c env) get(k string) (string, bool) {
 	if c.useDotEnv {
 		cfg, exist := c.envs[k]
-		return cfg, exist
+
+		return cfg, !hasZeroValue(cfg) && exist
 	}
 
 	cfg := os.Getenv(k)
-	return cfg, cfg != ""
+	return cfg, !hasZeroValue(cfg)
 }
 
 func (c env) GetStringArr(k string, def ...[]string) ([]string, error) {
 	cfg, exist := c.get(k)
 	if !exist {
 		if len(def) == 0 {
-			return nil, ErrorVarNotExist
+			return nil, ErrorVarNotExist.Errorf("%s", k)
 		}
 
 		return def[0], nil
@@ -107,7 +143,7 @@ func (c env) GetIntArr(k string, def ...[]int) ([]int, error) {
 	cfg, exist := c.get(k)
 	if !exist {
 		if len(def) == 0 {
-			return nil, ErrorVarNotExist
+			return nil, ErrorVarNotExist.Errorf("%s", k)
 		}
 		return def[0], nil
 	}
