@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/alfarih31/nb-go-parser"
 	"github.com/joho/godotenv"
+	"log"
 	"os"
 	"reflect"
 )
@@ -182,10 +183,20 @@ func LoadEnv(envPath string, fallbackToWide ...bool) (Env, error) {
 		return nil, err
 	}
 
-	if err == nil {
-		for key, val := range envs {
-			err = os.Setenv(key, val)
+	if err != nil {
+		if !fBackToWide {
+			return nil, err
 		}
+
+		log.Println("Use System Wide Environment!")
+		return env{
+			envs:      envs,
+			useDotEnv: false,
+		}, nil
+	}
+
+	for key, val := range envs {
+		err = os.Setenv(key, val)
 	}
 
 	return env{
