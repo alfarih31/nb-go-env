@@ -188,7 +188,7 @@ func LoadEnv(envPath string, fallbackToWide ...bool) (Env, error) {
 			return nil, err
 		}
 
-		log.Println("Use System Wide Environment!")
+		log.Printf("%s \n %s", "Warning! You are use System Wide Environment due to this error:", err.Error())
 		return env{
 			envs:      envs,
 			useDotEnv: false,
