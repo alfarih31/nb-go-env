@@ -3,7 +3,7 @@ module github.com/alfarih31/nb-go-env
 go 1.17
 
 require (
-	github.com/alfarih31/nb-go-parser v1.0.3
+	github.com/alfarih31/nb-go-parser v1.0.10
 	github.com/joho/godotenv v1.4.0
 	github.com/stretchr/testify v1.7.0
 )

@@ -26,6 +26,11 @@ func hasZeroValue(v interface{}) bool {
 		return true
 	}
 
+	switch t.Kind() {
+	case reflect.Map, reflect.Slice, reflect.Array:
+		return false
+	}
+
 	return v == reflect.Zero(t).Interface()
 }
 
@@ -54,10 +59,15 @@ type env struct {
 
 type Env interface {
 	GetInt(k string, def ...int) (int, error)
+	MustGetInt(k string, def ...int) int
 	GetString(k string, def ...string) (string, error)
+	MustGetString(k string, def ...string) string
 	GetBool(k string, def ...bool) (bool, error)
+	MustGetBool(k string, def ...bool) bool
 	GetStringArr(k string, def ...[]string) ([]string, error)
+	MustGetStringArr(k string, def ...[]string) []string
 	GetIntArr(k string, def ...[]int) ([]int, error)
+	MustGetIntArr(k string, def ...[]int) []int
 	Dump() (string, error)
 }
 
@@ -83,6 +93,15 @@ func (c env) GetInt(k string, def ...int) (int, error) {
 	return i, e
 }
 
+func (c env) MustGetInt(k string, def ...int) int {
+	v, err := c.GetInt(k, def...)
+	if err != nil {
+		panic(err)
+	}
+
+	return v
+}
+
 func (c env) GetString(k string, def ...string) (string, error) {
 	cfg, exist := c.get(k)
 	if !exist {
@@ -93,6 +112,15 @@ func (c env) GetString(k string, def ...string) (string, error) {
 	}
 
 	return cfg, nil
+}
+
+func (c env) MustGetString(k string, def ...string) string {
+	v, err := c.GetString(k, def...)
+	if err != nil {
+		panic(err)
+	}
+
+	return v
 }
 
 func (c env) GetBool(k string, def ...bool) (bool, error) {
@@ -114,6 +142,15 @@ func (c env) GetBool(k string, def ...bool) (bool, error) {
 	}
 
 	return b, e
+}
+
+func (c env) MustGetBool(k string, def ...bool) bool {
+	v, err := c.GetBool(k, def...)
+	if err != nil {
+		panic(err)
+	}
+
+	return v
 }
 
 func (c env) get(k string) (string, bool) {
@@ -140,6 +177,15 @@ func (c env) GetStringArr(k string, def ...[]string) ([]string, error) {
 	return parser.String(cfg).ToStringArr()
 }
 
+func (c env) MustGetStringArr(k string, def ...[]string) []string {
+	v, err := c.GetStringArr(k, def...)
+	if err != nil {
+		panic(err)
+	}
+
+	return v
+}
+
 func (c env) GetIntArr(k string, def ...[]int) ([]int, error) {
 	cfg, exist := c.get(k)
 	if !exist {
@@ -160,6 +206,15 @@ func (c env) GetIntArr(k string, def ...[]int) ([]int, error) {
 	}
 
 	return is, e
+}
+
+func (c env) MustGetIntArr(k string, def ...[]int) []int {
+	v, err := c.GetIntArr(k, def...)
+	if err != nil {
+		panic(err)
+	}
+
+	return v
 }
 
 func (c env) Dump() (string, error) {

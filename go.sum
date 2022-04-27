@@ -1,5 +1,5 @@
-github.com/alfarih31/nb-go-parser v1.0.3 h1:UeNLCb6aKnnbjwzZd6zhSrCit1lhBkBjRhCetekpPas=
-github.com/alfarih31/nb-go-parser v1.0.3/go.mod h1:0+2qf5oT5sEy4qyNxY/ewsREpHtUYfis3/bERolDFGI=
+github.com/alfarih31/nb-go-parser v1.0.10 h1:toUjnk8dnC6c+Y/coN+8f4tY5R/wuzR2xDdlV1whSS4=
+github.com/alfarih31/nb-go-parser v1.0.10/go.mod h1:0+2qf5oT5sEy4qyNxY/ewsREpHtUYfis3/bERolDFGI=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/joho/godotenv v1.4.0 h1:3l4+N6zfMWnkbPEXKng2o2/MR5mSwTrBih4ZEkkz1lg=
