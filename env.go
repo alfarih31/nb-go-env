@@ -1,13 +1,9 @@
 package env
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/alfarih31/nb-go-parser"
-	"github.com/joho/godotenv"
-	"log"
-	"os"
 	"reflect"
 )
 
@@ -53,8 +49,7 @@ func NewEnvErr(s string) *Err {
 var ErrorVarNotExist = NewEnvErr("variable not exist")
 
 type env struct {
-	envs      map[string]string
-	useDotEnv bool
+	cs ConfigServer
 }
 
 type Env interface {
@@ -72,7 +67,7 @@ type Env interface {
 }
 
 func (c env) GetInt(k string, def ...int) (int, error) {
-	cfg, exist := c.get(k)
+	cfg, exist := c.cs.Get(k)
 	if !exist {
 		if len(def) == 0 {
 			return 0, ErrorVarNotExist.Errorf("%s", k)
@@ -103,7 +98,7 @@ func (c env) MustGetInt(k string, def ...int) int {
 }
 
 func (c env) GetString(k string, def ...string) (string, error) {
-	cfg, exist := c.get(k)
+	cfg, exist := c.cs.Get(k)
 	if !exist {
 		if len(def) == 0 {
 			return "", ErrorVarNotExist.Errorf("%s", k)
@@ -124,7 +119,7 @@ func (c env) MustGetString(k string, def ...string) string {
 }
 
 func (c env) GetBool(k string, def ...bool) (bool, error) {
-	cfg, exist := c.get(k)
+	cfg, exist := c.cs.Get(k)
 	if !exist {
 		if len(def) == 0 {
 			return false, ErrorVarNotExist.Errorf("%s", k)
@@ -153,19 +148,8 @@ func (c env) MustGetBool(k string, def ...bool) bool {
 	return v
 }
 
-func (c env) get(k string) (string, bool) {
-	if c.useDotEnv {
-		cfg, exist := c.envs[k]
-
-		return cfg, !hasZeroValue(cfg) && exist
-	}
-
-	cfg := os.Getenv(k)
-	return cfg, !hasZeroValue(cfg)
-}
-
 func (c env) GetStringArr(k string, def ...[]string) ([]string, error) {
-	cfg, exist := c.get(k)
+	cfg, exist := c.cs.Get(k)
 	if !exist {
 		if len(def) == 0 {
 			return nil, ErrorVarNotExist.Errorf("%s", k)
@@ -187,7 +171,7 @@ func (c env) MustGetStringArr(k string, def ...[]string) []string {
 }
 
 func (c env) GetIntArr(k string, def ...[]int) ([]int, error) {
-	cfg, exist := c.get(k)
+	cfg, exist := c.cs.Get(k)
 	if !exist {
 		if len(def) == 0 {
 			return nil, ErrorVarNotExist.Errorf("%s", k)
@@ -218,44 +202,24 @@ func (c env) MustGetIntArr(k string, def ...[]int) []int {
 }
 
 func (c env) Dump() (string, error) {
-	if !c.useDotEnv {
-		return "", errors.New("cannot dump env, you are using system-wide env")
-	}
-
-	j, e := json.Marshal(c.envs)
-
-	return string(j), e
+	return c.cs.Dump()
 }
 
-func LoadEnv(envPath string, fallbackToWide ...bool) (Env, error) {
-	fBackToWide := false
-	if len(fallbackToWide) > 0 {
-		fBackToWide = fallbackToWide[0]
-	}
-
-	envs, err := godotenv.Read(envPath)
-	if err != nil && !fBackToWide {
-		return nil, err
-	}
-
-	if err != nil {
-		if !fBackToWide {
-			return nil, err
-		}
-
-		log.Printf("%s \n %s", "Warning! You are use System Wide Environment due to this error:", err.Error())
-		return env{
-			envs:      envs,
-			useDotEnv: false,
-		}, nil
-	}
-
-	for key, val := range envs {
-		err = os.Setenv(key, val)
+func LoadWithConfigServer(configServer ConfigServer) (Env, error) {
+	if configServer == nil {
+		return nil, errors.New("config server can't be nill")
 	}
 
 	return env{
-		envs:      envs,
-		useDotEnv: err == nil,
+		cs: configServer,
 	}, nil
+}
+
+func LoadEnv(envPath string, fallbackToWide ...bool) (Env, error) {
+	cs, err := NewDefaultConfigServer(envPath, fallbackToWide...)
+	if err != nil {
+		return nil, err
+	}
+
+	return LoadWithConfigServer(cs)
 }
