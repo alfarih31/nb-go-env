@@ -3,6 +3,7 @@ package env
 import (
 	"encoding/json"
 	"errors"
+	"github.com/alfarih31/nb-go-env/internal"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -34,11 +35,11 @@ func (dc defaultConfigServer) Get(k string) (string, bool) {
 	if dc.useDotEnv {
 		cfg, exist := dc.envs[k]
 
-		return cfg, !hasZeroValue(cfg) && exist
+		return cfg, !internal.HasZeroValue(cfg) && exist
 	}
 
 	cfg := os.Getenv(k)
-	return cfg, !hasZeroValue(cfg)
+	return cfg, !internal.HasZeroValue(cfg)
 }
 
 func NewDefaultConfigServer(envPath string, fallbackToWide ...bool) (ConfigServer, error) {

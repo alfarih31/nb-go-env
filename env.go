@@ -4,30 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/alfarih31/nb-go-parser"
-	"reflect"
 )
 
 type Err struct {
 	e error
-}
-
-// HasZeroValue Check a variable has Zero Value
-func hasZeroValue(v interface{}) bool {
-	if v == nil {
-		return true
-	}
-
-	t := reflect.TypeOf(v)
-	if t == nil {
-		return true
-	}
-
-	switch t.Kind() {
-	case reflect.Map, reflect.Slice, reflect.Array:
-		return false
-	}
-
-	return v == reflect.Zero(t).Interface()
 }
 
 func (e *Err) Errorf(f string, s ...interface{}) *Err {
